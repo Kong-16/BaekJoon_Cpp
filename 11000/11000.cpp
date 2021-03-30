@@ -1,11 +1,13 @@
 /*
-한 회의실에 가장 많은 회의가 들어가는 수 구하기
-그리디 알고리즘 사용.
-회의가 빨리 끝나는 순서대로 정렬 후 (끝나는 시간이 같다면 시작시간이 빠른 순) 맨 처음 회의 시작.
-이후의 회의의 시작시간이 진행 중인 회의 끝 시간보다 늦다면 회의실 사용. 
-정렬을 위해 merge sort사용.
+모든 회의를 진행시키기 위한 최소 회의실 수 구하기 
+그리디 알고리즘 사용
+회의 시작시간이 빠른 순으로 정렬 후 (같을 경우엔 종료시간이 빠른 순) 최소 큐에 첫 회의 종료시간 삽입.
+이후 회의의 시작 시간이 최소 큐의 top값 보다 작으면 최소 큐에 push, 크거나 같으면 top 제거 후 push.
+큐의 개수가 회의실 사용 수
 */
 #include <iostream>
+#include <queue>
+#include <vector>
 
 using namespace std;
 
@@ -20,11 +22,11 @@ void merge(meeting* initArr, meeting* mergedArr, int l, int m, int n) {//initArr
 	i2 = m + 1;
 
 	while (i1 <= m && i2 <= n) { //두 배열 비교해 작은 값 부터 순서대로 저장.
-		if (initArr[i1].end == initArr[i2].end) { // 끝나는 시간이 같으면 시작 시간이 빠른 순서
-			if(initArr[i1].start < initArr[i2].start) mergedArr[iResult++] = initArr[i1++];
+		if (initArr[i1].start == initArr[i2].start) {
+			if (initArr[i1].end < initArr[i2].end) mergedArr[iResult++] = initArr[i1++];
 			else mergedArr[iResult++] = initArr[i2++];
 		}
-		else if (initArr[i1].end < initArr[i2].end) mergedArr[iResult++] = initArr[i1++];
+		else if (initArr[i1].start < initArr[i2].start) mergedArr[iResult++] = initArr[i1++];
 		else mergedArr[iResult++] = initArr[i2++];
 	}
 
@@ -48,12 +50,13 @@ void rmergeSort(meeting* arr, int n) {
 }
 
 int main() {
-	int num ,start, end, count;
+	int num, start, end;
+	priority_queue<int,vector<int>,greater<int>> room; //최소 큐
 
-	count = 1;
 	cin >> num;
 
 	meeting* meeting_arr = new meeting[num];
+
 	for (int i = 0; i < num; i++) {
 		cin >> start >> end;
 		meeting_arr[i].start = start;
@@ -62,13 +65,12 @@ int main() {
 
 	rmergeSort(meeting_arr, num - 1);
 
-	end = meeting_arr[0].end;
-
+	room.push(meeting_arr[0].end);
 	for (int i = 1; i < num; i++) {
-		if (meeting_arr[i].start >= end) {
-			count++;
-			end = meeting_arr[i].end;
-		}
+		if (meeting_arr[i].start >= room.top())
+			room.pop();
+		room.push(meeting_arr[i].end);
 	}
-	cout << count;
+
+	cout << room.size();
 }
