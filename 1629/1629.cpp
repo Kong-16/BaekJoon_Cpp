@@ -17,5 +17,8 @@ ll power(ll x, ll y, ll z) {
 	return ret;
 }
 int main() {
-
+	FASTIO;
+	ll a, b, c;
+	cin >> a >> b >> c;
+	cout << power(a, b, c);
 }
